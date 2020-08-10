@@ -28,6 +28,7 @@ signals:
 
     void sigError(QString);
     void sigVideoStarted(int, int);
+    void sigVideoStopped();
     void sigFps(int);
     void sigCurFpsChanged(int);
 
@@ -42,9 +43,11 @@ private slots:
     void slotAboutToResize();
     void slotResized();
 
-    void slotStop();
+    void slotFinished();
 
 private:
+    void stopRender();
+
     RenderThread *m_thread;
     std::atomic_bool isFrameSwapped_;
     QString source_file_, device_name_;

@@ -26,6 +26,10 @@ NvidiaDecode::NvidiaDecode(DecodeTaskManagerImpl *taskManger, CreateDecoderFunc 
 NvidiaDecode::~NvidiaDecode()
 {
     qDebug() << "NvidiaDecode::~NvidiaDecode()";
+    if(decoder_){
+        delete decoder_;
+        decoder_ = nullptr;
+    }
 }
 
 extern CreateDecoderFunc g_gpurender_fuc_;
@@ -35,14 +39,11 @@ void NvidiaDecode::decode(const QString &url)
         return;
     }
 
-    if(decoder_){
-        delete decoder_;
-        decoder_ = nullptr;
-    }
     decoder_ = createDecoderFunc_();
     if(!decoder_){
         return;
     }
+    qDebug() << "NvidiaDecode::decode" << thread()->isInterruptionRequested();
     decoder_->decode(url.toStdString().data(), true, [&](void* ptr, const int pix, const int width, const int height, const std::string &err){
         if(thread()->isInterruptionRequested()){
             decoder_->stop();
@@ -69,6 +70,7 @@ void NvidiaDecode::decode(const QString &url)
         }
         decode_frames_++;
 
+//        qDebug() << "NvidiaDecode::decode" << __LINE__;
         thread()->Render([&](){
             if(!render_)
             {
@@ -80,7 +82,10 @@ void NvidiaDecode::decode(const QString &url)
             }
             render_->render(reinterpret_cast<unsigned char*>(ptr), width, height);
         });
+//        qDebug() << "NvidiaDecode::decode" << url << __LINE__;
     });
+    qDebug() << "NvidiaDecode::decode" << thread()->isInterruptionRequested() << __LINE__;
+    qDebug() << "--------";
 }
 
 void NvidiaDecode::destroy()

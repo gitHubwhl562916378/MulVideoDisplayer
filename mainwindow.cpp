@@ -93,7 +93,7 @@ bool MainWindow::event(QEvent *event)
             player->startPlay(urlList_.at(i).first, urlList_.at(i).second);
         }
     }
-    isFirst_ = true;
+    isFirst_ = false;
 
     return WidgetI::event(event);
 }

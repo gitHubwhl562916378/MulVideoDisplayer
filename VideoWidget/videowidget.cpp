@@ -1,5 +1,6 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QDebug>
 #include "renderthread.h"
 #include "videowidget.h"
 
@@ -16,6 +17,7 @@ VideoWidget::VideoWidget(QWidget *parent)
 
     connect(m_thread, &RenderThread::sigError, this, &VideoWidget::sigError);
     connect(m_thread, &RenderThread::sigVideoStarted, this, [&](int w, int h){m_state_ = Play; emit sigVideoStarted(w, h);});
+    connect(m_thread, &RenderThread::finished, this, &VideoWidget::slotFinished);
     connect(m_thread, &RenderThread::sigFps, this, &VideoWidget::sigFps);
     connect(m_thread, &RenderThread::sigCurFpsChanged, this, &VideoWidget::sigCurFpsChanged);
 }
@@ -24,7 +26,8 @@ VideoWidget::~VideoWidget()
 {
     if(m_thread->isRunning())
     {
-        slotStop();
+        disconnect(m_thread, &RenderThread::finished, this, &VideoWidget::slotFinished);
+        stopRender();
     }
     delete m_thread;
 }
@@ -51,10 +54,10 @@ VideoWidget::PlayState VideoWidget::state() const
 
 void VideoWidget::slotPlay(QString filename, QString device)
 {
-    if((m_state_ != Stopped)){
-        disconnect(m_thread, &RenderThread::finished, this, &VideoWidget::slotStop);
-        slotStop();
-        connect(m_thread, &RenderThread::finished, this, &VideoWidget::slotStop);
+    if(m_thread->isRunning()){
+        disconnect(m_thread, &RenderThread::finished, this, &VideoWidget::slotFinished);
+        stopRender();
+        connect(m_thread, &RenderThread::finished, this, &VideoWidget::slotFinished);
     }
     m_state_ = Ready;
     source_file_ = filename;
@@ -64,16 +67,12 @@ void VideoWidget::slotPlay(QString filename, QString device)
     m_thread->start();
 }
 
-void VideoWidget::slotStop()
+void VideoWidget::stopRender()
 {
     m_thread->requestInterruption();
     m_thread->prepareExit();
     m_thread->quit();
     m_thread->wait();
-    m_thread->lockRenderer();
-    m_thread->release();
-    m_thread->unlockRenderer();
-    m_state_ = Stopped;
 }
 
 void VideoWidget::resizeGL(int w, int h)
@@ -112,4 +111,18 @@ void VideoWidget::slotAboutToResize()
 void VideoWidget::slotResized()
 {
     m_thread->unlockRenderer();
+}
+
+void VideoWidget::slotFinished()
+{
+    m_state_ = Stopped;
+    m_thread->lockRenderer();
+    makeCurrent();
+    m_thread->release();
+    context()->functions()->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    context()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    doneCurrent();
+    m_thread->unlockRenderer();
+    update();
+    emit sigVideoStopped();
 }
