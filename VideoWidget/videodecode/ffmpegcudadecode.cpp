@@ -149,12 +149,6 @@ void FFmpegCudaDecode::decode(const QString &url)
     {
         if ((ret = av_read_frame(pFormatCtx, &packet)) < 0)
         {
-            if(ret != AVERROR_EOF)
-            {
-                av_strerror(ret, errorbuf, sizeof(errorbuf));
-                errorMsg = errorbuf;
-                thread()->sigError(errorMsg);
-            }
             break; //这里认为视频读取完了
         }
 
@@ -199,6 +193,11 @@ END:
         avformat_close_input(&pFormatCtx);
     }
     thread()->sigCurFpsChanged(0);
+    if(!thread()->isInterruptionRequested()){
+        if(url.left(4) == "rtsp"){
+            thread()->sigError("AVERROR_EOF");
+        }
+    }
 }
 
 void FFmpegCudaDecode::destroy()

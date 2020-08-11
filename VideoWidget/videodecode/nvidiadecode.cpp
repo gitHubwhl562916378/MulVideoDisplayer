@@ -81,6 +81,12 @@ void NvidiaDecode::decode(const QString &url)
             render_->render(reinterpret_cast<unsigned char*>(ptr), width, height);
         });
     });
+
+    if(!thread()->isInterruptionRequested()){
+        if(url.left(4) == "rtsp"){
+            thread()->sigError("AVERROR_EOF");
+        }
+    }
 }
 
 void NvidiaDecode::destroy()

@@ -22,6 +22,7 @@ public:
 
 public slots:
     void slotPlay(QString filename, QString device);
+    void slotStop();
 
 signals:
     void sigRequestRender();

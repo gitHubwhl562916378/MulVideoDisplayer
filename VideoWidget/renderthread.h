@@ -29,6 +29,9 @@ public:
     void setFileName(QString);
     void setDevice(QString);
 
+public slots:
+    void slotMoveContext();
+
 signals:
     void sigContextWanted();
 

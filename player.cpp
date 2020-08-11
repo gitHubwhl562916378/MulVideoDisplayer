@@ -8,6 +8,9 @@ Player::Player(QWidget *parent):
 {
     errorL_ = new ErrorLabel(this);
     errorL_->hide();
+    timer_ = new QTimer(this);
+    timer_->setInterval(5000);
+    connect(timer_, SIGNAL(timeout()), this, SLOT(slotTimeout()));
     connect(this, SIGNAL(sigError(QString)), this, SLOT(slotError(QString)));
     connect(this, &VideoWidget::sigVideoStarted, this, [&](int w, int h){errorL_->hide();});
     connect(this, &VideoWidget::sigVideoStopped, this, &Player::slotStoped);
@@ -15,6 +18,7 @@ Player::Player(QWidget *parent):
 
 void Player::startPlay(const QString &url, const QString &device)
 {
+    timer_->stop();
     errorL_->hide();
     VideoWidget::slotPlay(url, device);
 }
@@ -27,7 +31,12 @@ void Player::slotError(QString str)
 
 void Player::slotStoped()
 {
-    QTimer::singleShot(5000, this, [&]{
-        slotPlay(url(), deviceName());
-    });
+    timer_->start();
+}
+
+void Player::slotTimeout()
+{
+    errorL_->clear();
+    errorL_->hide();
+    slotPlay(url(), deviceName());
 }

@@ -2,6 +2,7 @@
 #include <QSettings>
 #include <QFile>
 #include <QMenu>
+#include <QTimer>
 #include "realplaymanager.h"
 #include "player.h"
 #include "mainwindow.h"
@@ -10,11 +11,13 @@
 MainWindow::MainWindow(QWidget *parent)
     : WidgetI(parent)
 {
-    QSettings configSettings("config.ini",QSettings::IniFormat);
+    playTimer_ = new QTimer(this);
+    connect(playTimer_, SIGNAL(timeout()), this, SLOT(slotVideoTimeout()));
     playManager_ = new RealPlayManager;
 
     menu_ = new QMenu(playManager_);
     QSettings setting("config.ini",QSettings::IniFormat);
+    playTimer_->setInterval(setting.value("VideoScreen/timeout").toInt() * 1000);
     int default_screen = setting.value("VideoScreen/default").toInt();
     int count = setting.beginReadArray("VideoScreen");
     for(int i = 0; i < count; i++){
@@ -84,16 +87,35 @@ bool MainWindow::event(QEvent *event)
 
     for(int i = 0; i < playManager_->screenCount(); i++)
     {
-        if(i >= urlList_.count()){
+        if(playIndex_ == urlList_.count()){
+            playIndex_ = 0;
             break;
         }
+
         Player* player = playManager_->indexWidget(i);
         if(player)
         {
-            player->startPlay(urlList_.at(i).first, urlList_.at(i).second);
+            player->startPlay(urlList_.at(playIndex_).first, urlList_.at(playIndex_).second);
+            playIndex_++;
         }
     }
+    playTimer_->start();
     isFirst_ = false;
 
     return WidgetI::event(event);
+}
+
+void MainWindow::slotVideoTimeout()
+{
+    int sIndex = screenIndex_++ % playManager_->screenCount();
+    if(playIndex_ == urlList_.count()){
+        playIndex_ = 0;
+    }
+
+    Player* player = playManager_->indexWidget(sIndex);
+    if(player)
+    {
+        player->startPlay(urlList_.at(playIndex_).first, urlList_.at(playIndex_).second);
+        playIndex_++;
+    }
 }

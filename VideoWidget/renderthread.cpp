@@ -70,6 +70,9 @@ void RenderThread::Render(const std::function<void (void)> handle)
     m_grabMutex.unlock();
 
     if(isInterruptionRequested()){
+        if(ctx->thread() == QThread::currentThread()){
+            ctx->moveToThread(qGuiApp->thread());
+        }
         return;
     }
 
@@ -108,6 +111,15 @@ void RenderThread::setFileName(QString f)
 void RenderThread::setDevice(QString d)
 {
     device_ = d;
+}
+
+void RenderThread::slotMoveContext()
+{
+    QOpenGLContext *ctx = gl_widget_->context();
+    qDebug() << "RenderThread::slotMoveContext" << ctx->thread() << QThread::currentThread() << qGuiApp->thread();
+    if(ctx && ctx->thread() == QThread::currentThread()){
+        ctx->moveToThread(qGuiApp->thread());
+    }
 }
 
 void RenderThread::run()
