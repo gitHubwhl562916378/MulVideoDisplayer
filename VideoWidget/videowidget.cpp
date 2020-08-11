@@ -23,7 +23,7 @@ VideoWidget::VideoWidget(QWidget *parent)
     });
     connect(m_thread, &RenderThread::sigFps, this, &VideoWidget::sigFps);
     connect(m_thread, &RenderThread::sigCurFpsChanged, this, &VideoWidget::sigCurFpsChanged);
-    connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::QueuedConnection);
+    connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::UniqueConnection);
 }
 
 VideoWidget::~VideoWidget()
@@ -73,7 +73,7 @@ void VideoWidget::slotStop()
     if(m_thread->isRunning()){
         disconnect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()));
         slotFinished();
-        connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::QueuedConnection);
+        connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::UniqueConnection);
     }
 }
 
