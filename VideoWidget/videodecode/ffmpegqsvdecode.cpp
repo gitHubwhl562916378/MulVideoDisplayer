@@ -266,6 +266,7 @@ int FFmpegQsvDecode::decode_packet(AVCodecContext *decoder_ctx, AVFrame *frame, 
             {
                 render_ = thread()->getRender(sw_frame->format);
                 render_->initialize(sw_frame->width, sw_frame->height);
+                thread()->sigVideoStarted(sw_frame->width, sw_frame->height);
             }
             render_->render(buffer_, sw_frame->width, sw_frame->height);
         });

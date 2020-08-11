@@ -240,6 +240,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
                 thread()->setExtraData(nullptr);
                 render_ = thread()->getRender(pFrame->format);
                 render_->initialize(pFrame->width, pFrame->height);
+                thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
             render_->render(pFrame->data, pFrame->linesize, pFrame->width, pFrame->height);
         });

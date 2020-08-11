@@ -244,6 +244,7 @@ int FFmpegCpuDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet, 
             {
                 render_ = thread()->getRender(pFrame->format);
                 render_->initialize(pFrame->width, pFrame->height);
+                thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
             render_->render(buffer_, pFrame->width, pFrame->height);
         });

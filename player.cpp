@@ -12,7 +12,10 @@ Player::Player(QWidget *parent):
     timer_->setInterval(5000);
     connect(timer_, SIGNAL(timeout()), this, SLOT(slotTimeout()));
     connect(this, SIGNAL(sigError(QString)), this, SLOT(slotError(QString)));
-    connect(this, &VideoWidget::sigVideoStarted, this, [&](int w, int h){errorL_->hide();});
+    connect(this, &VideoWidget::sigVideoStarted, this, [&](int w, int h){
+        errorL_->hide();
+        timer_->stop();
+    });
     connect(this, &VideoWidget::sigVideoStopped, this, &Player::slotStoped);
 }
 
