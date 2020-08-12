@@ -131,7 +131,7 @@ void VideoWidget::slotFinished()
     m_thread->quit();
     m_thread->wait();
 
-    m_thread->lockRenderer();
+//    m_thread->lockRenderer();
     while (context()->thread() != QThread::currentThread()) {
         qDebug() << context()->thread() << "main slotFinished" << QThread::currentThread() << qGuiApp->thread();
         m_thread->prepareExit();
@@ -144,7 +144,7 @@ void VideoWidget::slotFinished()
     context()->functions()->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     context()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     doneCurrent();
-    m_thread->unlockRenderer();
+//    m_thread->unlockRenderer();
 
     update();
     if(sender() == qobject_cast<QObject*>(m_thread)){

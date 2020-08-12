@@ -16,7 +16,7 @@ Player::Player(QWidget *parent):
         errorL_->hide();
         timer_->stop();
     });
-    connect(this, &VideoWidget::sigVideoStopped, this, &Player::slotStoped);
+//    connect(this, &VideoWidget::sigVideoStopped, this, &Player::slotStoped);
 }
 
 void Player::startPlay(const QString &url, const QString &device)
@@ -30,6 +30,7 @@ void Player::slotError(QString str)
 {
     errorL_->setText(str);
     errorL_->show();
+    timer_->start();
 }
 
 void Player::slotStoped()
