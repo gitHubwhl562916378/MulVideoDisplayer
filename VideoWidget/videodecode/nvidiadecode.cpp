@@ -50,7 +50,6 @@ void NvidiaDecode::decode(const QString &url)
         if(!err.empty())
         {
             thread()->sigError(QString::fromStdString(err));
-            qDebug() << QString::fromStdString(err);
         }
         if(pix != AV_PIX_FMT_NV12){
             return;
