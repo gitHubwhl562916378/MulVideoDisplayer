@@ -3,11 +3,9 @@
 
 #include <QThread>
 #include <QMutex>
-#include <QWaitCondition>
 #include "render/factory.h"
 #include "render/videorender.h"
 QT_FORWARD_DECLARE_CLASS(QOpenGLContext)
-QT_FORWARD_DECLARE_CLASS(DecodeTask)
 QT_FORWARD_DECLARE_CLASS(QSurface)
 class RenderThread : public QThread
 {
@@ -15,6 +13,7 @@ class RenderThread : public QThread
 public:
     RenderThread(QSurface *surface, QOpenGLContext *ctx = nullptr, QObject *parent = nullptr);
     ~RenderThread() override;
+    virtual QMutex* renderLocker(){ return  &render_mtx; }
     VideoRender* currentRender() {return  render_;}
 
     virtual VideoRender* getRender(int);
@@ -42,9 +41,9 @@ private:
     QOpenGLContext *context_;
     QSurface *surface_;
     VideoRender *render_ = nullptr;
+    QMutex render_mtx;
 
     QString file_name_, device_;
-    std::shared_ptr<DecodeTask> m_task_{nullptr};
     void *exte_data_{nullptr};
 };
 

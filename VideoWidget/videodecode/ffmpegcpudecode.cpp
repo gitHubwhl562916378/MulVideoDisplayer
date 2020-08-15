@@ -160,12 +160,6 @@ END:
         avformat_close_input(&pFormatCtx);
     }
 
-    thread()->Render([&](){
-        if(render_){
-            delete render_;
-            render_ = nullptr;
-        }
-    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){
@@ -205,11 +199,11 @@ int FFmpegCpuDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet, 
             {
                 render_ = thread()->getRender(pFrame->format);
                 render_->initialize(pFrame->width, pFrame->height);
+                thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
-            render_->render(pFrame->data, pFrame->linesize, pFrame->width, pFrame->height);
+            render_->upLoad(pFrame->data, pFrame->linesize, pFrame->width, pFrame->height);
         });
 #else
-
 //        pFrame->pts =  pFrame->best_effort_timestamp;
 //        if(pFrame->pts != AV_NOPTS_VALUE)
 //        {

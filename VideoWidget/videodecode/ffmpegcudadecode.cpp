@@ -193,12 +193,6 @@ END:
         avformat_close_input(&pFormatCtx);
     }
 
-    thread()->Render([&](){
-        if(render_){
-            delete render_;
-            render_ = nullptr;
-        }
-    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){
@@ -232,7 +226,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
             goto fail;
         }
 
-#if 1
+#if 0
         thread()->Render([&](){
             if(!render_)
             {
@@ -286,6 +280,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
             {
                 render_ = thread()->getRender(swFrame->format);
                 render_->initialize(swFrame->width, swFrame->height);
+                thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
             render_->upLoad(buffer_, swFrame->width, swFrame->height);
         });

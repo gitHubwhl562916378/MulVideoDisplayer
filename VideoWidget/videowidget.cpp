@@ -12,12 +12,7 @@ VideoWidget::VideoWidget(QWidget *parent)
 
 VideoWidget::~VideoWidget()
 {
-    if(m_thread->isRunning())
-    {
-        disconnect(m_thread, &RenderThread::finished, this, &VideoWidget::slotFinished);
-        disconnect();
-        slotStop();
-    }
+    slotStop();
     delete m_thread;
 }
 
@@ -38,22 +33,33 @@ VideoWidget::PlayState VideoWidget::state() const
 
 void VideoWidget::slotPlay(QString filename, QString device)
 {
-    slotStop();
-    m_state_ = Ready;
-    source_file_ = filename;
-    device_name_ = device;
-    m_thread->setDevice(device);
-    m_thread->setFileName(filename);
-    m_thread->start();
+    if(is_initized_)
+    {
+        slotStop();
+        m_state_ = Ready;
+        source_file_ = filename;
+        device_name_ = device;
+        m_thread->setDevice(device);
+        m_thread->setFileName(filename);
+        m_thread->start();
+    }else{
+        connect(this, &VideoWidget::sigInitized, this, [=]{
+            slotStop();
+            m_state_ = Ready;
+            source_file_ = filename;
+            device_name_ = device;
+            m_thread->setDevice(device);
+            m_thread->setFileName(filename);
+            m_thread->start();
+        });
+    }
 }
 
 void VideoWidget::slotStop()
 {
-    if(m_thread->isRunning()){
-        disconnect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()));
-        slotFinished();
-        connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::UniqueConnection);
-    }
+    m_thread->requestInterruption();
+    m_thread->quit();
+    m_thread->wait();
 }
 
 void VideoWidget::initializeGL()
@@ -78,6 +84,8 @@ void VideoWidget::initializeGL()
     connect(m_thread, &RenderThread::sigFps, this, &VideoWidget::sigFps);
     connect(m_thread, &RenderThread::sigCurFpsChanged, this, &VideoWidget::sigCurFpsChanged);
     connect(m_thread, SIGNAL(finished()), this, SLOT(slotFinished()), Qt::UniqueConnection);
+    is_initized_ = true;
+    emit sigInitized();
 }
 
 void VideoWidget::resizeGL(int w, int h)
@@ -87,8 +95,8 @@ void VideoWidget::resizeGL(int w, int h)
 
 void VideoWidget::paintGL()
 {
-    if(!m_thread->currentRender())
-    {
+    QMutexLocker lock(m_thread->renderLocker());
+    if(!m_thread->currentRender()){
         return;
     }
 
@@ -98,11 +106,5 @@ void VideoWidget::paintGL()
 void VideoWidget::slotFinished()
 {
     m_state_ = Stopped;
-    m_thread->requestInterruption();
-    m_thread->quit();
-    m_thread->wait();
-
-    if(sender() == qobject_cast<QObject*>(m_thread)){
-        emit sigVideoStopped();
-    }
+    emit sigVideoStopped();
 }

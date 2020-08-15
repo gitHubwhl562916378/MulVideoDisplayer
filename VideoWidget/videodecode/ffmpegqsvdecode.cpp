@@ -183,12 +183,6 @@ END:
         avformat_close_input(&pFormatCtx);
     }
 
-    thread()->Render([&](){
-        if(render_){
-            delete render_;
-            render_ = nullptr;
-        }
-    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){

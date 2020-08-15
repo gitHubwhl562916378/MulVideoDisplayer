@@ -1,6 +1,7 @@
 #include "yuvrender.h"
 #include <iostream>
 #include <QMutexLocker>
+#include <QThread>
 YuvRender::~YuvRender()
 {
     vbo.destroy();
@@ -11,9 +12,11 @@ YuvRender::~YuvRender()
     }
 }
 
+Q_GLOBAL_STATIC(QMutex, initMutex)
 void YuvRender::initialize(const int width, const int height, const bool horizontal, const bool vertical)
 {
     initializeOpenGLFunctions();
+    QMutexLocker initLock(initMutex());
     const char *vsrc =
             "attribute vec4 vertexIn; \
              attribute vec4 textureIn; \
@@ -223,16 +226,29 @@ void YuvRender::upLoad(unsigned char *buffer, const int w, const int h)
     QMutexLocker lock(&mtx);
     glActiveTexture(GL_TEXTURE0 + 2);
     glBindTexture(GL_TEXTURE_2D,idY);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,w,h,GL_RED,GL_UNSIGNED_BYTE,buffer);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RED,w,h,0,GL_RED,GL_UNSIGNED_BYTE,buffer);
+    //https://blog.csdn.net/xipiaoyouzi/article/details/53584798 纹理参数解析
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //https://blog.csdn.net/xipiaoyouzi/article/details/53584798 纹理参数解析
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D,idU);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,w >> 1, h >> 1,GL_RED,GL_UNSIGNED_BYTE,buffer + w * h);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RED,w >> 1, h >> 1,0,GL_RED,GL_UNSIGNED_BYTE,buffer + w * h);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D,idV);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,w >> 1, h >> 1,GL_RED,GL_UNSIGNED_BYTE,buffer + w*h*5/4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w >> 1, h >> 1, 0, GL_RED, GL_UNSIGNED_BYTE, buffer + w*h*5/4);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void YuvRender::upLoad(unsigned char *planr[], const int line_size[], const int width, const int height)

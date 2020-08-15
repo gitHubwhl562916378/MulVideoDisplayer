@@ -24,7 +24,7 @@ public slots:
     void slotStop();
 
 signals:
-    void sigRequestRender();
+    void sigInitized();
 
     void sigError(QString);
     void sigVideoStarted(int, int);
@@ -41,9 +41,10 @@ private slots:
     void slotFinished();
 
 private:
-    RenderThread *m_thread;
+    RenderThread *m_thread = nullptr;
     QString source_file_, device_name_;
     PlayState m_state_;
+    bool is_initized_ = false;
 };
 
 #endif // VIDEOWIDGET_H
