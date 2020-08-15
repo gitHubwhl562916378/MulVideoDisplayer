@@ -10,7 +10,6 @@ public:
     virtual ~DecodeTask(){}
     virtual RenderThread* thread(){return m_thread_;}
     virtual void decode(const QString &url) = 0;
-    virtual void destroy() = 0;
 
 private:
     RenderThread *m_thread_;

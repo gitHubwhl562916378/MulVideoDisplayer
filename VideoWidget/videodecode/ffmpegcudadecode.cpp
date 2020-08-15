@@ -173,7 +173,7 @@ void FFmpegCudaDecode::decode(const QString &url)
     }
     packet.data = nullptr;
     packet.size = 0;
-//    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
+    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
 
 END:
     if(pFrame)
@@ -192,19 +192,18 @@ END:
     {
         avformat_close_input(&pFormatCtx);
     }
+
+    thread()->Render([&](){
+        if(render_){
+            delete render_;
+            render_ = nullptr;
+        }
+    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){
             thread()->sigError("AVERROR_EOF");
         }
-    }
-}
-
-void FFmpegCudaDecode::destroy()
-{
-    if(render_){
-        delete render_;
-        render_ = nullptr;
     }
 }
 
@@ -242,7 +241,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
                 render_->initialize(pFrame->width, pFrame->height);
                 thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
-            render_->render(pFrame->data, pFrame->linesize, pFrame->width, pFrame->height);
+            render_->upLoad(pFrame->data, pFrame->linesize, pFrame->width, pFrame->height);
         });
 #else
         //gpu拷贝到cpu，相对耗时
@@ -288,7 +287,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
                 render_ = thread()->getRender(swFrame->format);
                 render_->initialize(swFrame->width, swFrame->height);
             }
-            render_->render(buffer_, swFrame->width, swFrame->height);
+            render_->upLoad(buffer_, swFrame->width, swFrame->height);
         });
 #endif
 

@@ -182,19 +182,18 @@ END:
     {
         avformat_close_input(&pFormatCtx);
     }
+
+    thread()->Render([&](){
+        if(render_){
+            delete render_;
+            render_ = nullptr;
+        }
+    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){
             thread()->sigError("AVERROR_EOF");
         }
-    }
-}
-
-void FFmpegQsvDecode::destroy()
-{
-    if(render_){
-        delete render_;
-        render_ = nullptr;
     }
 }
 
@@ -268,7 +267,7 @@ int FFmpegQsvDecode::decode_packet(AVCodecContext *decoder_ctx, AVFrame *frame, 
                 render_->initialize(sw_frame->width, sw_frame->height);
                 thread()->sigVideoStarted(sw_frame->width, sw_frame->height);
             }
-            render_->render(buffer_, sw_frame->width, sw_frame->height);
+            render_->upLoad(buffer_, sw_frame->width, sw_frame->height);
         });
 
     fail:

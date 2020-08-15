@@ -10,7 +10,6 @@ public:
     ~NvidiaDecode() override;
 
     void decode(const QString &url) override;
-    void destroy() override;
 
 private:
     DecodeTaskManagerImpl *taskManager_ = nullptr;

@@ -10,7 +10,6 @@ public:
     ~FFmpegCpuDecode() override;
 
     void decode(const QString &url) override;
-    void destroy() override;
 
 private:
     int decode_packet(AVCodecContext *avctx, AVPacket *packet, AVFrame *frame);

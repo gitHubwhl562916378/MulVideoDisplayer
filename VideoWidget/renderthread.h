@@ -6,39 +6,31 @@
 #include <QWaitCondition>
 #include "render/factory.h"
 #include "render/videorender.h"
-QT_FORWARD_DECLARE_CLASS(VideoWidget)
 QT_FORWARD_DECLARE_CLASS(QOpenGLContext)
 QT_FORWARD_DECLARE_CLASS(DecodeTask)
+QT_FORWARD_DECLARE_CLASS(QSurface)
 class RenderThread : public QThread
 {
     Q_OBJECT
 public:
-    RenderThread(VideoWidget *glw, QObject *parent = nullptr);
+    RenderThread(QSurface *surface, QOpenGLContext *ctx = nullptr, QObject *parent = nullptr);
     ~RenderThread() override;
-    void lockRenderer() { m_renderMutex.lock(); }
-    void unlockRenderer() { m_renderMutex.unlock(); }
-    QMutex *grabMutex() { return &m_grabMutex; }
-    QWaitCondition *grabCond() { return &m_grabCond; }
-    void prepareExit() {m_grabCond.wakeAll(); }
+    VideoRender* currentRender() {return  render_;}
 
     virtual VideoRender* getRender(int);
     virtual void Render(const std::function<void (void)>);
     virtual void setExtraData(void *ctx){exte_data_ = ctx;}
-    virtual void release();
 
     void setFileName(QString);
     void setDevice(QString);
 
-public slots:
-    void slotMoveContext();
-
 signals:
-    void sigContextWanted();
-
     void sigError(QString);
     void sigVideoStarted(int, int);
     void sigFps(int);
     void sigCurFpsChanged(int);
+
+    void sigTextureReady();
 
 protected:
     void run() override;
@@ -47,10 +39,9 @@ private:
     static Factory<VideoRender, int>* renderFactoryInstance();
     static std::atomic_bool isInited_;
 
-    VideoWidget *gl_widget_;
-    QMutex m_renderMutex;
-    QMutex m_grabMutex;
-    QWaitCondition m_grabCond;
+    QOpenGLContext *context_;
+    QSurface *surface_;
+    VideoRender *render_ = nullptr;
 
     QString file_name_, device_;
     std::shared_ptr<DecodeTask> m_task_{nullptr};

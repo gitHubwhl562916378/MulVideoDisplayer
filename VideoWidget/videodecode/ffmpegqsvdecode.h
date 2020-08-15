@@ -9,7 +9,6 @@ public:
     FFmpegQsvDecode(DecodeTaskManagerImpl *taskManger, RenderThread *render_thr);
     ~FFmpegQsvDecode();
     void decode(const QString &url) override;
-    void destroy() override;
 
 private:
     int decode_packet(AVCodecContext *decoder_ctx,

@@ -144,7 +144,7 @@ void FFmpegCpuDecode::decode(const QString &url)
     }
     packet.data = nullptr;
     packet.size = 0;
-//    ret = decode_packet(pCodecCtx, &packet, pFrame);
+    ret = decode_packet(pCodecCtx, &packet, pFrame);
 
 END:
     if(pFrame)
@@ -159,19 +159,18 @@ END:
     {
         avformat_close_input(&pFormatCtx);
     }
+
+    thread()->Render([&](){
+        if(render_){
+            delete render_;
+            render_ = nullptr;
+        }
+    });
     thread()->sigCurFpsChanged(0);
     if(!thread()->isInterruptionRequested()){
         if(url.left(4) == "rtsp"){
             thread()->sigError("AVERROR_EOF");
         }
-    }
-}
-
-void FFmpegCpuDecode::destroy()
-{
-    if(render_){
-        delete render_;
-        render_ = nullptr;
     }
 }
 
@@ -246,7 +245,7 @@ int FFmpegCpuDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet, 
                 render_->initialize(pFrame->width, pFrame->height);
                 thread()->sigVideoStarted(pFrame->width, pFrame->height);
             }
-            render_->render(buffer_, pFrame->width, pFrame->height);
+            render_->upLoad(buffer_, pFrame->width, pFrame->height);
         });
 #endif
 
