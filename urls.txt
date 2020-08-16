@@ -1,6 +1,6 @@
-rtsp://192.168.2.66/person.avi cpu
-rtsp://192.168.2.66/person.avi cuda
-rtsp://192.168.2.66/person.avi cuda
-rtsp://192.168.2.66/person.avi cuda_plugin
-rtsp://192.168.2.66/person.avi cuda_plugin
-rtsp://192.168.2.66/person.avi cuda_plugin
+rtmp://58.200.131.2:1935/livetv/gxtv cuda_plugin
+rtmp://58.200.131.2:1935/livetv/hunantv cuda_plugin
+rtmp://58.200.131.2:1935/livetv/gdtv cuda_plugin
+rtmp://58.200.131.2:1935/livetv/dftv cuda_plugin
+rtmp://58.200.131.2:1935/livetv/bttv cuda_plugin
+rtmp://58.200.131.2:1935/livetv/dntv cuda_plugin

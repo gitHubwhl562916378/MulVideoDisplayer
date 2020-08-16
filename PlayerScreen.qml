@@ -10,8 +10,8 @@ Rectangle{
         id: grid
         property int screenCount: 0
         anchors.fill: parent
-        rowSpacing: 5
-        columnSpacing: 5
+        rowSpacing: 1
+        columnSpacing: 1
     }
 
     function initItem(itemObj, args)
