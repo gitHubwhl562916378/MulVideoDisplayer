@@ -11,7 +11,6 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfoList>
-#include <QApplication>
 
 DLL::CloudHttpDao::CloudHttpDao()
 {

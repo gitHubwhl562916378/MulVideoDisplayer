@@ -12,6 +12,7 @@ class RenderThread : public QThread
     Q_OBJECT
 public:
     RenderThread(QSurface *surface, QOpenGLContext *ctx = nullptr, QObject *parent = nullptr);
+    RenderThread(QObject *parent = nullptr);
     ~RenderThread() override;
     virtual QMutex* renderLocker(){ return  &render_mtx; }
     VideoRender* currentRender() {return  render_;}
@@ -22,6 +23,9 @@ public:
 
     void setFileName(QString);
     void setDevice(QString);
+    void setSurface(QSurface *surface);
+    void setContext(QOpenGLContext *ctx);
+    QOpenGLContext* context();
 
 signals:
     void sigError(QString);

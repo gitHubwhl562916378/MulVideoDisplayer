@@ -11,7 +11,7 @@ HEADERS += \
     $$PWD/videodecode/ffmpegqsvdecode.h \
     $$PWD/videodecode/nvidia_decoer_api.h \
     $$PWD/videodecode/nvidiadecode.h \
-    $$PWD/videowidget.h
+    $$PWD/videoitem.h
 
 SOURCES += \
     $$PWD/render/nv12render.cpp \
@@ -23,4 +23,4 @@ SOURCES += \
     $$PWD/videodecode/ffmpegcudadecode.cpp \
     $$PWD/videodecode/ffmpegqsvdecode.cpp \
     $$PWD/videodecode/nvidiadecode.cpp \
-    $$PWD/videowidget.cpp
+    $$PWD/videoitem.cpp

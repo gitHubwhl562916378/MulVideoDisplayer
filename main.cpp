@@ -1,7 +1,10 @@
-﻿#include <QApplication>
+﻿#include <QGuiApplication>
+#include <QQmlApplicationEngine>
 #include <Windows.h>
+#include "VideoWidget/videoitem.h"
 #include "Service/servicefacetory.h"
-#include "mainwindow.h"
+#include "common_data.h"
+#include "filehelper.h"
 
 extern "C" {
 //确保连接了nvidia的显示器
@@ -12,18 +15,27 @@ extern "C" {
 #pragma execution_character_set("utf-8")
 int main(int argc, char *argv[])
 {
-    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-    QApplication a(argc, argv);
-    a.setApplicationName(QObject::tr("多路视频播放器"));
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    QGuiApplication app(argc, argv);
+
+    qmlRegisterType<VideoItem>("SceneGraphRendering", 1, 0, "VideoItem");
+    qmlRegisterType<FileHelper>("SceneGraphRendering", 1, 0, "FileHelper");
+
     ServiceFactoryI *facetoryI = new ServiceFactory;
-    a.setProperty(FACETORY_KEY, reinterpret_cast<unsigned long long>(facetoryI));
+    app.setProperty(FACETORY_KEY, reinterpret_cast<unsigned long long>(facetoryI));
 
-    MainWindow w;
-    w.setWindowFlag(Qt::FramelessWindowHint);
-    w.showMaximized();
+    QQmlApplicationEngine engine;
+    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+    engine.load(url);
 
-    QObject::connect(qApp, &QApplication::aboutToQuit, [&]{
+    QObject::connect(qGuiApp, &QGuiApplication::aboutToQuit, [&]{
         delete facetoryI;
     });
-    return a.exec();
+    return app.exec();
 }

@@ -36,6 +36,23 @@ RenderThread::RenderThread(QSurface *surface, QOpenGLContext *ctx, QObject *pare
     }
 }
 
+RenderThread::RenderThread(QObject *parent):
+    QThread (parent)
+{
+    if(!isInited_.load()){
+        renderFactoryInstance()->Register(AV_PIX_FMT_YUV420P, []()->VideoRender*{return new YuvRender;});
+        renderFactoryInstance()->Register(AV_PIX_FMT_NV12, []()->VideoRender*{return new Nv12Render;});
+        CreateRenderFunc func = nullptr;
+        QLibrary dllLoad("Nv12Render_Gpu"); //Nv2RGBRender_Gpu Nv12Render_Gpu
+        if(dllLoad.load()){
+            func = (CreateRenderFunc)dllLoad.resolve("createRender");
+            renderFactoryInstance()->Register(AV_PIX_FMT_CUDA, [=]()->VideoRender*{return func(exte_data_);});
+        }
+
+        isInited_.store(true);
+    }
+}
+
 RenderThread::~RenderThread()
 {
     context_->doneCurrent();
@@ -72,6 +89,25 @@ void RenderThread::setFileName(QString f)
 void RenderThread::setDevice(QString d)
 {
     device_ = d;
+}
+
+void RenderThread::setSurface(QSurface *surface)
+{
+    surface_ = surface;
+}
+
+void RenderThread::setContext(QOpenGLContext *ctx)
+{
+    context_ = new QOpenGLContext();
+    context_->setFormat(ctx->format());
+    context_->setShareContext(ctx);
+    context_->create();
+    context_->moveToThread(this);
+}
+
+QOpenGLContext *RenderThread::context()
+{
+    return context_;
 }
 
 void RenderThread::run()
