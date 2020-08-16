@@ -173,7 +173,7 @@ void FFmpegCudaDecode::decode(const QString &url)
     }
     packet.data = nullptr;
     packet.size = 0;
-    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
+//    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
 
 END:
     if(pFrame)
@@ -246,22 +246,22 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
             goto fail;
         }
 
-//        swFrame->pts =  pFrame->best_effort_timestamp;
-//        if(swFrame->pts != AV_NOPTS_VALUE)
-//        {
-//            if(last_pts_ != AV_NOPTS_VALUE)
-//            {
-//                AVRational ra;
-//                ra.num = 1;
-//                ra.den = AV_TIME_BASE;
-//                int64_t delay = av_rescale_q(swFrame->pts - last_pts_, stream_time_base_, ra);
-//                if(delay > 0 && delay < 1000000)
-//                {
-//                    QThread::usleep(delay);
-//                }
-//            }
-//            last_pts_ = swFrame->pts;
-//        }
+        swFrame->pts =  pFrame->best_effort_timestamp;
+        if(swFrame->pts != AV_NOPTS_VALUE)
+        {
+            if(last_pts_ != AV_NOPTS_VALUE)
+            {
+                AVRational ra;
+                ra.num = 1;
+                ra.den = AV_TIME_BASE;
+                int64_t delay = av_rescale_q(swFrame->pts - last_pts_, stream_time_base_, ra);
+                if(delay > 0 && delay < 1000000)
+                {
+                    QThread::usleep(delay);
+                }
+            }
+            last_pts_ = swFrame->pts;
+        }
         if(!buffer_)
         {
             bufferSize_ = av_image_get_buffer_size(AVPixelFormat(swFrame->format), swFrame->width,
