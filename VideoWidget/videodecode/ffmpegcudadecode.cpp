@@ -226,7 +226,7 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
             goto fail;
         }
 
-#if 0
+#if 1
         thread()->Render([&](){
             if(!render_)
             {
