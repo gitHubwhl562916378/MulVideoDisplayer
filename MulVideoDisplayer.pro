@@ -20,7 +20,7 @@ SOURCES += \
         filehelper.cpp \
         main.cpp
 
-RESOURCES += qml.qrc \
+RESOURCES += \
     qml.qrc
 
 INCLUDEPATH += D:/ffmpeg/x64/include \
