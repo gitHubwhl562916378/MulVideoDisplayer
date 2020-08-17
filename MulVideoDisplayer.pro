@@ -23,11 +23,11 @@ SOURCES += \
 RESOURCES += qml.qrc \
     qml.qrc
 
-INCLUDEPATH += D:/ffmpeg/x64/include \
+INCLUDEPATH += E:/ffmpeg/x64/include \
                $$(INTELMEDIASDKROOT)/include \
                $$PWD/3rd/curl/include
 
-LIBS += -LD:/ffmpeg/x64/lib \
+LIBS += -LE:/ffmpeg/x64/lib \
         $$PWD/3rd/curl/lib/windows/win64/libcurl-d_imp.lib \
         avcodec.lib avdevice.lib avfilter.lib avformat.lib avutil.lib postproc.lib swresample.lib swscale.lib \
         ws2_32.lib
