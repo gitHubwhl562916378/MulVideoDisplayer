@@ -158,6 +158,8 @@ void YuvRender::render(uchar *yuvPtr, const int w, const int h)
     }
 
     glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDepthMask(false);
     program.bind();
     vbo.bind();
     program.enableAttributeArray("vertexIn");
@@ -284,6 +286,8 @@ void YuvRender::draw()
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDepthMask(false);
 
     program.bind();
     vbo.bind();
