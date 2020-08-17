@@ -1,6 +1,6 @@
-rtsp://192.168.2.66/person.avi cpu
-rtsp://192.168.2.66/person.avi cuda
-rtsp://192.168.2.66/person.avi cuda
+rtsp://192.168.2.66/person.avi cuda_plugin
+rtsp://192.168.2.66/person.avi cuda_plugin
+rtsp://192.168.2.66/person.avi cuda_plugin
 rtsp://192.168.2.66/person.avi cuda_plugin
 rtsp://192.168.2.66/person.avi cuda_plugin
 rtsp://192.168.2.66/person.avi cuda_plugin
