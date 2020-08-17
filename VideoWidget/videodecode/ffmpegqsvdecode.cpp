@@ -163,7 +163,7 @@ void FFmpegQsvDecode::decode(const QString &url)
     //flash decoder
     packet.data = nullptr;
     packet.size = 0;
-    ret = decode_packet(pCodecCtx, pFrame, swFrame, &packet);
+//    ret = decode_packet(pCodecCtx, pFrame, swFrame, &packet);
 
 END:
     if(pFrame)

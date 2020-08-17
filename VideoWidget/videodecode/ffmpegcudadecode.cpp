@@ -173,7 +173,7 @@ void FFmpegCudaDecode::decode(const QString &url)
     }
     packet.data = nullptr;
     packet.size = 0;
-    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
+//    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
 
 END:
     if(pFrame)

@@ -144,7 +144,7 @@ void FFmpegCpuDecode::decode(const QString &url)
     }
     packet.data = nullptr;
     packet.size = 0;
-    ret = decode_packet(pCodecCtx, &packet, pFrame);
+//    ret = decode_packet(pCodecCtx, &packet, pFrame);
 
 END:
     if(pFrame)
