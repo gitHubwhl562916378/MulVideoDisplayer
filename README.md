@@ -64,3 +64,8 @@
 
 >* 解决视频重播放，或者一个视频窗口多次播放，在第二次之后的播放，视频y分量无法正常渲染的问题
 >* 解决播放视频结束后opengl资源与cuda资源释放问题
+
+#### 2020/8/18
+
+>* 功能测试ok，i5-8400 @ 2.80GHz, GeForce RTX2070播放16路1080p, fps 25 rtsp流, cuda_plugin解码， Nv2RGBRender_Gpu(GeForce GT730不能工作)。cpu占比38%左右,运行一段时间后变为20%左右, 显存1个G; 解码引擎46%。
+>* 功能测试ok，i7-7700 @ 3.6GHz, GeForce GT730播放6路1080p, fps 25 rtsp流, cuda_plugin解码， Nv12Render_Gpu。cpu占比16%,运行一段时间后变为5%左右, 显存0.4个G; 解码引擎80%。
