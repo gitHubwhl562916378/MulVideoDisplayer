@@ -113,6 +113,13 @@ void FFmpegCudaDecode::decode(const QString &url)
         goto  END;
     }
 
+    if(pCodecCtx->pix_fmt < 0)
+    {
+        errorMsg = "unknow pixformat";
+        thread()->sigError(errorMsg);
+        goto  END;
+    }
+
     int vden = video->avg_frame_rate.den,vnum = video->avg_frame_rate.num;
     if(vden <= 0)
     {
@@ -176,6 +183,14 @@ void FFmpegCudaDecode::decode(const QString &url)
 //    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
 
 END:
+    thread()->Render([&](){
+        if(!render_)
+        {
+            return ;
+        }
+        render_->upLoad(nullptr, 0, 0, 0);
+    });
+
     if(pFrame)
     {
         av_frame_free(&pFrame);
