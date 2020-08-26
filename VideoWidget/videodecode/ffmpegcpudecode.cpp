@@ -103,13 +103,10 @@ void FFmpegCpuDecode::decode(const QString &url)
     }
 
     int vden = video->avg_frame_rate.den,vnum = video->avg_frame_rate.num;
-    if(vden <= 0)
+    if(vden > 0)
     {
-        errorMsg = "get fps failed";
-        thread()->sigError(errorMsg);
-        goto  END;
+        thread()->sigFps(vnum/vden);
     }
-    thread()->sigFps(vnum/vden);
     stream_time_base_ = video->time_base;
 
     ///打开解码器
@@ -153,14 +150,13 @@ void FFmpegCpuDecode::decode(const QString &url)
     packet.size = 0;
 //    ret = decode_packet(pCodecCtx, &packet, pFrame);
 
-END:
-    thread()->Render([&](){
-        if(!render_)
-        {
-            return ;
+    thread()->sigCurFpsChanged(0);
+    if(!thread()->isInterruptionRequested()){
+        if(url.left(4) == "rtsp"){
+            thread()->sigError("AVERROR_EOF");
         }
-        render_->render(nullptr, 0, 0);
-    });
+    }
+END:
     if(pFrame)
     {
         av_frame_free(&pFrame);
@@ -172,13 +168,6 @@ END:
     if(pFormatCtx)
     {
         avformat_close_input(&pFormatCtx);
-    }
-
-    thread()->sigCurFpsChanged(0);
-    if(!thread()->isInterruptionRequested()){
-        if(url.left(4) == "rtsp"){
-            thread()->sigError("AVERROR_EOF");
-        }
     }
 }
 

@@ -145,13 +145,13 @@ void Nv12Render::render(uchar *nv12Ptr, const int w, const int h)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDepthMask(false);
     if(!nv12Ptr){
         return;
     }
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDepthMask(false);
     program.bind();
     vbo.bind();
     program.enableAttributeArray("vertexIn");
@@ -179,6 +179,11 @@ void Nv12Render::render(uchar *nv12Ptr, const int w, const int h)
 void Nv12Render::render(unsigned char *planr[], const int line_size[], const int width, const int height)
 {
     if(!planr){
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDepthMask(false);
         return;
     }
 

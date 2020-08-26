@@ -97,6 +97,8 @@ void VideoWidget::paintGL()
 {
     QMutexLocker lock(m_thread->renderLocker());
     if(!m_thread->currentRender()){
+        QOpenGLContext::currentContext()->functions()->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        QOpenGLContext::currentContext()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         return;
     }
 
@@ -106,5 +108,6 @@ void VideoWidget::paintGL()
 void VideoWidget::slotFinished()
 {
     m_state_ = Stopped;
+    update();
     emit sigVideoStopped();
 }

@@ -30,6 +30,7 @@ void Player::slotError(QString str)
 {
     errorL_->setText(str);
     errorL_->show();
+    timer_->stop();
     timer_->start();
 }
 

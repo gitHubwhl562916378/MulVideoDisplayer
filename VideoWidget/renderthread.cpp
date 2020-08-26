@@ -24,9 +24,10 @@ RenderThread::RenderThread(QSurface *surface, QOpenGLContext *ctx, QObject *pare
 
     if(!isInited_.load()){
         renderFactoryInstance()->Register(AV_PIX_FMT_YUV420P, []()->VideoRender*{return new YuvRender;});
+        renderFactoryInstance()->Register(AV_PIX_FMT_YUVJ420P, []()->VideoRender*{return new YuvRender;});
         renderFactoryInstance()->Register(AV_PIX_FMT_NV12, []()->VideoRender*{return new Nv12Render;});
         CreateRenderFunc func = nullptr;
-        QLibrary dllLoad("Nv12Render_Gpu"); //Nv2RGBRender_Gpu Nv12Render_Gpu
+        QLibrary dllLoad("Nv2RGBRender_Gpu"); //Nv2RGBRender_Gpu Nv12Render_Gpu
         if(dllLoad.load()){
             func = (CreateRenderFunc)dllLoad.resolve("createRender");
             renderFactoryInstance()->Register(AV_PIX_FMT_CUDA, [=]()->VideoRender*{return func(exte_data_);});
