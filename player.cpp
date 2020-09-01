@@ -28,6 +28,7 @@ void Player::startPlay(const QString &url, const QString &device)
 
 void Player::slotError(QString str)
 {
+    qDebug() << url() << str;
     errorL_->setText(str);
     errorL_->show();
     timer_->stop();
