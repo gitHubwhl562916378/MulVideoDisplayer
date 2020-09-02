@@ -13,8 +13,7 @@ Player::Player(QWidget *parent):
     connect(timer_, SIGNAL(timeout()), this, SLOT(slotTimeout()));
     connect(this, SIGNAL(sigError(QString)), this, SLOT(slotError(QString)));
     connect(this, &VideoWidget::sigVideoStarted, this, [&](int w, int h){
-        errorL_->hide();
-        timer_->stop();
+//        errorL_->hide();
     });
 //    connect(this, &VideoWidget::sigVideoStopped, this, &Player::slotStoped);
 }
@@ -31,7 +30,6 @@ void Player::slotError(QString str)
     qDebug() << url() << str;
     errorL_->setText(str);
     errorL_->show();
-    timer_->stop();
     timer_->start();
 }
 
@@ -42,6 +40,7 @@ void Player::slotStoped()
 
 void Player::slotTimeout()
 {
+    timer_->stop();
     errorL_->clear();
     errorL_->hide();
     slotPlay(url(), deviceName());
