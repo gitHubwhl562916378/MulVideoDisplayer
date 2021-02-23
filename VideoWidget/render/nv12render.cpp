@@ -218,6 +218,7 @@ void Nv12Render::upLoad(unsigned char *buffer, const int w, const int h)
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D,idUV);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w >> 1,h >> 1, GL_RG, GL_UNSIGNED_BYTE, buffer + w*h);
+    glFlush();
 }
 
 void Nv12Render::upLoad(unsigned char* planr[], const int line_size[], const int width, const int height)
