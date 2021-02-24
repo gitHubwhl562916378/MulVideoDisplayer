@@ -120,13 +120,6 @@ void FFmpegQsvDecode::decode(const QString &url)
     }
     pCodecCtx->get_format = get_qsv_hw_format;
 
-    if(pCodecCtx->pix_fmt < 0)
-    {
-        errorMsg = "unknow pixformat";
-        thread()->sigError(errorMsg);
-        goto  END;
-    }
-
     ///打开解码器
     if ((ret = avcodec_open2(pCodecCtx, nullptr, nullptr)) < 0) {
         av_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -204,7 +197,7 @@ int FFmpegQsvDecode::decode_packet(AVCodecContext *decoder_ctx, AVFrame *frame, 
     if (ret < 0) {
         av_strerror(ret, errorbuf, sizeof(errorbuf));
         errorMsg = errorbuf;
-        thread()->sigError(errorMsg);
+        // thread()->sigError(errorMsg);
         return ret;
     }
 
