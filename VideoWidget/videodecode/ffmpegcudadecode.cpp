@@ -113,14 +113,18 @@ void FFmpegCudaDecode::decode(const QString &url)
         goto  END;
     }
 
-    int vden = video->avg_frame_rate.den,vnum = video->avg_frame_rate.num;
-    if(vden <= 0)
+    if(pCodecCtx->pix_fmt < 0)
     {
-        errorMsg = "get fps failed";
+        errorMsg = "unknow pixformat";
         thread()->sigError(errorMsg);
         goto  END;
     }
-    thread()->sigFps(vnum/vden);
+
+    int vden = video->avg_frame_rate.den,vnum = video->avg_frame_rate.num;
+    if(vden > 0)
+    {
+        thread()->sigFps(vnum/vden);
+    }
     stream_time_base_ = video->time_base;
 
     pCodecCtx->get_format = get_cuda_hw_format;
@@ -175,6 +179,12 @@ void FFmpegCudaDecode::decode(const QString &url)
     packet.size = 0;
 //    ret = decode_packet(pCodecCtx, &packet, pFrame, swFrame);
 
+    thread()->sigCurFpsChanged(0);
+    if(!thread()->isInterruptionRequested()){
+        if(url.left(4) == "rtsp"){
+            thread()->sigError("AVERROR_EOF");
+        }
+    }
 END:
     if(pFrame)
     {
@@ -191,13 +201,6 @@ END:
     if(pFormatCtx)
     {
         avformat_close_input(&pFormatCtx);
-    }
-
-    thread()->sigCurFpsChanged(0);
-    if(!thread()->isInterruptionRequested()){
-        if(url.left(4) == "rtsp"){
-            thread()->sigError("AVERROR_EOF");
-        }
     }
 }
 
@@ -246,22 +249,22 @@ int FFmpegCudaDecode::decode_packet(AVCodecContext *pCodecCtx, AVPacket *packet,
             goto fail;
         }
 
-        swFrame->pts =  pFrame->best_effort_timestamp;
-        if(swFrame->pts != AV_NOPTS_VALUE)
-        {
-            if(last_pts_ != AV_NOPTS_VALUE)
-            {
-                AVRational ra;
-                ra.num = 1;
-                ra.den = AV_TIME_BASE;
-                int64_t delay = av_rescale_q(swFrame->pts - last_pts_, stream_time_base_, ra);
-                if(delay > 0 && delay < 1000000)
-                {
-                    QThread::usleep(delay);
-                }
-            }
-            last_pts_ = swFrame->pts;
-        }
+//        swFrame->pts =  pFrame->best_effort_timestamp;
+//        if(swFrame->pts != AV_NOPTS_VALUE)
+//        {
+//            if(last_pts_ != AV_NOPTS_VALUE)
+//            {
+//                AVRational ra;
+//                ra.num = 1;
+//                ra.den = AV_TIME_BASE;
+//                int64_t delay = av_rescale_q(swFrame->pts - last_pts_, stream_time_base_, ra);
+//                if(delay > 0 && delay < 1000000)
+//                {
+//                    QThread::usleep(delay);
+//                }
+//            }
+//            last_pts_ = swFrame->pts;
+//        }
         if(!buffer_)
         {
             bufferSize_ = av_image_get_buffer_size(AVPixelFormat(swFrame->format), swFrame->width,

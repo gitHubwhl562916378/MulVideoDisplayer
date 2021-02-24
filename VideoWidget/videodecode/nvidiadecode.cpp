@@ -43,10 +43,12 @@ void NvidiaDecode::decode(const QString &url)
     if(!decoder_){
         return;
     }
+    std::string error;
     decoder_->decode(url.toStdString().data(), true, [&](void* ptr, const int pix, const int width, const int height, const std::string &err){
         if(thread()->isInterruptionRequested()){
             decoder_->stop();
         }
+        error = err;
         if(!err.empty())
         {
             thread()->sigError(QString::fromStdString(err));
@@ -74,7 +76,10 @@ void NvidiaDecode::decode(const QString &url)
                 thread()->setExtraData(decoder_->context());
                 render_ = thread()->getRender(AV_PIX_FMT_CUDA);
                 render_->initialize(width, height);
-                thread()->sigFps(decoder_->fps());
+                if(decoder_->fps())
+                {
+                    thread()->sigFps(decoder_->fps());
+                }
                 thread()->sigVideoStarted(width, height);
             }
             render_->upLoad(reinterpret_cast<unsigned char*>(ptr), width, height);
@@ -82,7 +87,7 @@ void NvidiaDecode::decode(const QString &url)
     });
 
     if(!thread()->isInterruptionRequested()){
-        if(url.left(4) == "rtsp"){
+        if(url.left(4) == "rtsp" && error.empty()){
             thread()->sigError("AVERROR_EOF");
         }
     }

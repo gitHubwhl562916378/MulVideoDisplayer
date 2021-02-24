@@ -79,13 +79,10 @@ void FFmpegQsvDecode::decode(const QString &url)
     }
 
     int vden = video_st->avg_frame_rate.den,vnum = video_st->avg_frame_rate.num;
-    if(vden <= 0)
+    if(vden > 0)
     {
-        errorMsg = "get fps failed";
-        thread()->sigError(errorMsg);
-        goto  END;
+        thread()->sigFps(vnum/vden);
     }
-    thread()->sigFps(vnum/vden);
 
     if ((ret = taskManager_->hwDecoderInit(AV_HWDEVICE_TYPE_QSV)) < 0)
     {
@@ -165,6 +162,12 @@ void FFmpegQsvDecode::decode(const QString &url)
     packet.size = 0;
 //    ret = decode_packet(pCodecCtx, pFrame, swFrame, &packet);
 
+    thread()->sigCurFpsChanged(0);
+    if(!thread()->isInterruptionRequested()){
+        if(url.left(4) == "rtsp"){
+            thread()->sigError("AVERROR_EOF");
+        }
+    }
 END:
     if(pFrame)
     {
@@ -182,13 +185,6 @@ END:
     {
         avformat_close_input(&pFormatCtx);
     }
-
-    thread()->sigCurFpsChanged(0);
-    if(!thread()->isInterruptionRequested()){
-        if(url.left(4) == "rtsp"){
-            thread()->sigError("AVERROR_EOF");
-        }
-    }
 }
 
 int FFmpegQsvDecode::decode_packet(AVCodecContext *decoder_ctx, AVFrame *frame, AVFrame *sw_frame, AVPacket *pkt)
@@ -201,7 +197,7 @@ int FFmpegQsvDecode::decode_packet(AVCodecContext *decoder_ctx, AVFrame *frame, 
     if (ret < 0) {
         av_strerror(ret, errorbuf, sizeof(errorbuf));
         errorMsg = errorbuf;
-        thread()->sigError(errorMsg);
+        // thread()->sigError(errorMsg);
         return ret;
     }
 
